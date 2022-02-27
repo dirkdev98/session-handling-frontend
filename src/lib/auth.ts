@@ -5,6 +5,11 @@ import { destroyCookie, parseCookies, setCookie } from "nookies";
 import { apiAuthRefreshTokens } from "../generated/auth/apiClient";
 import { AuthTokenPairApi } from "../generated/common/types";
 
+/**
+ * Use nookies to create cookies from the provided token pair.
+ * The `ctx` can be `undefined` when this runs in the browser.
+ * It decodes the tokens, so the cookies expire when the tokens expire.
+ */
 export function createCookiesFromTokenPair(
   ctx: GetServerSidePropsContext | undefined,
   tokenPair: AuthTokenPairApi,
@@ -22,6 +27,9 @@ export function createCookiesFromTokenPair(
   });
 }
 
+/**
+ * Remove the access and refresh token cookies
+ */
 export function removeCookies(ctx: GetServerSidePropsContext | undefined) {
   destroyCookie(ctx, "accessToken");
   destroyCookie(ctx, "refreshToken");
