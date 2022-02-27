@@ -1,10 +1,14 @@
 import axios, { AxiosRequestConfig } from "axios";
 import jwtDecode from "jwt-decode";
+import { GetServerSidePropsContext } from "next";
 import { destroyCookie, parseCookies, setCookie } from "nookies";
 import { apiAuthRefreshTokens } from "../generated/auth/apiClient";
 import { AuthTokenPairApi } from "../generated/common/types";
 
-export function createCookiesFromTokenPair(ctx: any, tokenPair: AuthTokenPairApi) {
+export function createCookiesFromTokenPair(
+  ctx: GetServerSidePropsContext | undefined,
+  tokenPair: AuthTokenPairApi,
+) {
   const accessToken = jwtDecode(tokenPair.accessToken) as any;
   const refreshToken = jwtDecode(tokenPair.refreshToken) as any;
 
@@ -18,7 +22,7 @@ export function createCookiesFromTokenPair(ctx: any, tokenPair: AuthTokenPairApi
   });
 }
 
-export function removeCookies(ctx: any) {
+export function removeCookies(ctx: GetServerSidePropsContext | undefined) {
   destroyCookie(ctx, "accessToken");
   destroyCookie(ctx, "refreshToken");
 }
@@ -33,7 +37,7 @@ export function removeCookies(ctx: any) {
  *    - If successfully, runs all requests in the queue and resolves the current request
  */
 export function axiosRefreshTokenInterceptor(
-  ctx: any,
+  ctx: GetServerSidePropsContext | undefined,
 ): (config: AxiosRequestConfig) => Promise<AxiosRequestConfig> {
   let isRefreshing = false;
   const queueWhileRefreshing: (() => AxiosRequestConfig)[] = [];
