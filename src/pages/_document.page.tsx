@@ -7,8 +7,7 @@ class Document extends _Document {
   render() {
     return (
       <Html lang="nl">
-        <Head>
-        </Head>
+        <Head></Head>
         <body className="antialiased">
           <Main />
           <NextScript />

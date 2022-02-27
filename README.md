@@ -2,8 +2,8 @@
 
 From @lightbasenl/scaffold
 
-- [ ] Local to remote API
-- [ ] Local to local API
+- [x] Local to remote API
+- [x] Local to local API
 - [ ] Remote to remote API
 
 Tasks;

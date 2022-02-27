@@ -1,10 +1,10 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { AppProps } from "next/app";
 import "css/tailwind.css";
+import { AppProps } from "next/app";
+import React, { useRef, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
-import { parseCookies } from "nookies";
 import { ApiProvider } from "../generated/common/reactQuery";
+import { axiosRefreshTokenInterceptor } from "../lib/auth";
 
 function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(
@@ -19,26 +19,26 @@ function App({ Component, pageProps }: AppProps) {
       }),
   );
 
-  const client = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    withCredentials: true,
+  const accessTokenRefreshState = useRef<{
+    isRefreshing: boolean;
+    requestQueue: { resolve: (value?: unknown) => void; reject: (reason?: unknown) => void }[];
+  }>({
+    isRefreshing: false,
+    requestQueue: [],
   });
 
-  useEffect(() => {
-    client.interceptors.request.use(value => {
-      const cookies = parseCookies(undefined);
-
-      if (cookies.accessToken) {
-        value.headers = value.headers ?? {};
-        value.headers["Authorization"] = `Bearer ${cookies.accessToken}`;
-      }
-
-      return value;
+  const [axiosInstance] = useState(() => {
+    const client = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_API_URL,
     });
-  }, [client]);
+
+    client.interceptors.request.use(axiosRefreshTokenInterceptor(undefined));
+
+    return client;
+  });
 
   return (
-    <ApiProvider instance={client}>
+    <ApiProvider instance={axiosInstance}>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps?.dehydratedState}>
           <Component {...pageProps} />
