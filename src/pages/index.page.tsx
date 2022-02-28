@@ -8,13 +8,13 @@ export default function Home() {
   const isLoggedIn = useAuthMe();
   const login = useAuthLogin({
     onSuccess: data => {
-      createCookiesFromTokenPair(undefined, data);
+      createCookiesFromTokenPair(data);
       queryClient.invalidateQueries([]);
     },
   });
   const logout = useAuthLogout({
     onSuccess: data => {
-      removeCookies(undefined);
+      removeCookies();
       queryClient.invalidateQueries([]);
     },
   });

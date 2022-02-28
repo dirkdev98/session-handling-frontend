@@ -24,7 +24,7 @@ function App({ Component, pageProps }: AppProps) {
       baseURL: process.env.NEXT_PUBLIC_API_URL,
     });
 
-    client.interceptors.request.use(axiosRefreshTokenInterceptor(undefined));
+    client.interceptors.request.use(axiosRefreshTokenInterceptor());
 
     return client;
   });

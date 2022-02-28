@@ -10,10 +10,7 @@ import { AuthTokenPairApi } from "../generated/common/types";
  * The `ctx` can be `undefined` when this runs in the browser.
  * It decodes the tokens, so the cookies expire when the tokens expire.
  */
-export function createCookiesFromTokenPair(
-  ctx: GetServerSidePropsContext | undefined,
-  tokenPair: AuthTokenPairApi,
-) {
+export function createCookiesFromTokenPair(tokenPair: AuthTokenPairApi, ctx?: GetServerSidePropsContext) {
   const accessToken = jwtDecode(tokenPair.accessToken) as any;
   const refreshToken = jwtDecode(tokenPair.refreshToken) as any;
 
@@ -30,7 +27,7 @@ export function createCookiesFromTokenPair(
 /**
  * Remove the access and refresh token cookies
  */
-export function removeCookies(ctx: GetServerSidePropsContext | undefined) {
+export function removeCookies(ctx?: GetServerSidePropsContext) {
   destroyCookie(ctx, "accessToken");
   destroyCookie(ctx, "refreshToken");
 }
@@ -45,7 +42,7 @@ export function removeCookies(ctx: GetServerSidePropsContext | undefined) {
  *    - If successfully, runs all requests in the queue and resolves the current request
  */
 export function axiosRefreshTokenInterceptor(
-  ctx: GetServerSidePropsContext | undefined,
+  ctx?: GetServerSidePropsContext,
 ): (config: AxiosRequestConfig) => Promise<AxiosRequestConfig> {
   let isRefreshing = false;
   const queueWhileRefreshing: (() => AxiosRequestConfig)[] = [];
@@ -67,9 +64,10 @@ export function axiosRefreshTokenInterceptor(
           refreshToken: cookies.refreshToken,
         });
 
-        createCookiesFromTokenPair(ctx, cookies);
+        createCookiesFromTokenPair(cookies, ctx);
       } catch {
         // If we can't refresh, we can safely remove the refresh token
+        // This way this refresh logic isn't triggered for any subsequent requests
         removeCookies(ctx);
       }
 
